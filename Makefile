@@ -5,7 +5,7 @@ CFLAGS=-g -Wall -std=c99
 
 all: tester
 
-main: $(SOURCES) $(HEADERS)
+tester: $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) $(SOURCES) -o tester
 
 clean:
