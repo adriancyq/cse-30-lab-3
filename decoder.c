@@ -19,30 +19,24 @@
  * @returns the value of the bit at index in c
  */
 int extractBit(char c, int index){
-    // TODO Implement me!
-    //works
-    int ascii = (int) c +1;
-    int *bitArray = calloc(8,sizeof(int));
-    int soFar =0;
+    int mask;                               /* Mask to extract desired bit */
+    int extractedBit;                       /* Desired bit */
 
-    for (int i=7; i>=0; i--){
-    	int exponent = 1;
-    	for(int n = 0; n<i;n++){
-    		exponent = 2*exponent;
-    	}
-    	if(soFar+exponent < ascii){
-    		soFar += exponent;
-    		bitArray[i] = 1;
-    	}
-    	else{
-    		bitArray[i] = 0;
-    	}
+    /* Create the mask by shifting 1 by (index) bits */
+    mask = 1 << index; 
+
+    /* Extract the desired bit */
+    extractedBit = c & mask;
+
+    /* If there exists a 1 at any position in extracted bit, it is greater 
+    than 0 */
+    if (extractedBit > 0) {
+        return 1;
     }
-    if(bitArray[index]==1){
-    	return 1;
-    }
-    else{
-    	return 0;
+
+    /* No set bits anywhere */
+    else {
+        return 0;
     }
 }
 
@@ -56,19 +50,23 @@ int extractBit(char c, int index){
  * @returns the corresponding character from MAPPING
  */
 char decodeChar(char *b){
-    // TODO Implement me!
-    //works
-    int total=0;
-    for(int i=0; i<6; i++){
-    	int indexVal = (int)(b[i]-'0');
-    	int exponent = 1;
-    	for(int n =5-i;n>0;n--){
-    		exponent = 2*exponent;
-    	}
-    	total += indexVal*exponent;
+    int index;
+    int exponent = 5;
+    int asciiOffset;
+    int mappingIndex = 0;
+    char decodedChar;
+
+    /* Create the index that maps to associated char in MAPPING */
+    for (index = 0; index < 6; index++) {
+
+        /* Grab each char, convert to int, raise to corresponding power */
+        mappingIndex += (b[i] - asciiOffset) * (2^exponent);
+        exponent--;
     }
-    char finalAnswer = MAPPING[total];
-    return finalAnswer;
+
+    /* Decode the char */
+    decodedChar = MAPPING[mappingIndex];
+    return decodedChar;
 }
 
 /**
@@ -86,24 +84,47 @@ char decodeChar(char *b){
  * @param index the index of the bit to extract from each char
 */
 void codeToBinary(FILE *in, FILE *out, int index){
-    // TODO Implement me!
-    //doesnt work
-    int charValue = 0;
+    int asciiOffset = 48;           /* ASCII '0' is 48, ASCII '1' is 49 */
+    int encodedChar;                /* char grabbed from input stream */
+    int extractedBit;               /* desired bit in encodedChar */
+    char writeChar;                 /* char to write out */
 
-    do{
-    	charValue = fgetc(in);
-    	char c = (char) charValue;
-    	int bitValue = extractBit(c, index);
-    	if(bitValue==0){
-    		fprintf(out,"0");
-    	}
-    	else{
-    		fprintf(out, "1");
-    	}
-    } while(charValue!=EOF);
-    fclose(in);
-    fclose(out);
+    /* Check if we have valid filestreams */
+    if ((!in) || (!out)) {
+        return;
+    }
+
+    while (1) {
+
+        /* Grab the next encoded char */
+        encodedChar = fgetc(in);
+
+        /* Check if we have reached end of file */
+        if (encodedChar == EOF) {
+            break;
+        }
+
+        /* Extract the bit we care about as an int */
+        extractedBit = extractBit(encodedChar, index);
+
+        /* If bit is 1, write out ASCII '1' */
+        if (extractedBit) {
+            writeChar = '1';
+        }
+
+        /* If bit is 0, write out ASCII '0' */
+        else {
+            writeChar = '0';
+        }
+
+        /* Write out the char to output */
+        fwrite(writeChar, sizeof(char), 1, out);
+    }
+
+    return;
 }
+
+
 
 /**
  * Takes a FILE handle in as input (corresponding to a
@@ -117,21 +138,33 @@ void codeToBinary(FILE *in, FILE *out, int index){
  * @Param out the decoded output file (ASCII)
 */
 void binaryToText(FILE *in, FILE *out){
-    // TODO Implement me!
-    //doesnt work
-    int charValue;
-    do{
-    	char *charArray = calloc(6,sizeof(char));
-    	for(int i = 0;i<6; i++){
-    		charArray[i] = fgetc(in);
-    		charValue = (int) charArray[i];
-    	}
-    	char answer = decodeChar(charArray);
-    	fprintf(out,"%c", answer);
-    } while(charValue!=EOF);
-    fclose(in);
-    fclose(out);
+    char inputBuffer[6];                        /* Stores 6 input chars */
+    char decodedChar;                           /* decoded char from buffer */
+
+    /* Check if we have valid filestreams */
+    if ((!in) || (!out)) {
+        return;
+    }
+
+    while (1) {
+
+        /* Read 6 chars at a time */
+        charsRead = fread(inputBuffer, sizeof(char), 6, in);
+
+        /* Check for EOF */
+        if (charsRead != 6) {
+            break;
+        }
+
+        /* Decode the char and write it out */
+        decodedChar = decodeChar(inputBuffer);
+        fwrite(decodedChar, sizeof(char), 1, out);
+    }
+
+    return;
 }
+
+
 
 /**
  * Reads in a file from the specified input path and outputs a a binary decoding to
@@ -145,14 +178,29 @@ void binaryToText(FILE *in, FILE *out){
  * @param index The index of the bit from which binary values should be extracted
  */
 void decodeFile(char* input, char* bin, char* output, int index){
-    // TODO Implement me!
-	 //doesnt work
-    FILE *inputFile = fopen(input, "r");
-    FILE *outputFile = fopen(output, "w");
-    FILE *binFile = fopen(bin, "w");
-    codeToBinary(inputFile,binFile,index);
-    binaryToText(binFile,outputFile);
-    fclose(inputFile);
-    fclose(outputFile);
-    fclose(binFile);
+    FILE * in;                      /* Encoded chars */
+    FILE * out;                     /* Decoded chars */
+    FILE * binaryIn;                /* encode to binary */
+
+    /* Open filestreams for encoded, binary, and output */
+    in = fopen(input, "rb");
+    binaryIn = fopen(bin, "wb");
+    out = fopen(output, "wb");
+
+    /* Check that they are valid */
+    if((!in) || (!out) || (!binaryIn)) {
+        return;
+    }
+
+    /* Convert the encoded message to binary */
+    codeToBinary(in, binaryIn, index);
+    fclose(in);
+    fclose(binaryIn);
+
+    /* Convert the binary to text */
+    binaryIn = fopen(bin, "rb");
+    binaryToText(binaryIn, out);
+    fclose(binaryIn);
+    fclose(out);
+
 }
