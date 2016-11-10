@@ -20,6 +20,30 @@
  */
 int extractBit(char c, int index){
     // TODO Implement me!
+    //works
+    int ascii = (int) c +1;
+    int *bitArray = calloc(8,sizeof(int));
+    int soFar =0;
+
+    for (int i=7; i>=0; i--){
+    	int exponent = 1;
+    	for(int n = 0; n<i;n++){
+    		exponent = 2*exponent;
+    	}
+    	if(soFar+exponent < ascii){
+    		soFar += exponent;
+    		bitArray[i] = 1;
+    	}
+    	else{
+    		bitArray[i] = 0;
+    	}
+    }
+    if(bitArray[index]==1){
+    	return 1;
+    }
+    else{
+    	return 0;
+    }
 }
 
 /**
@@ -33,6 +57,18 @@ int extractBit(char c, int index){
  */
 char decodeChar(char *b){
     // TODO Implement me!
+    //works
+    int total=0;
+    for(int i=0; i<6; i++){
+    	int indexVal = (int)(b[i]-'0');
+    	int exponent = 1;
+    	for(int n =5-i;n>0;n--){
+    		exponent = 2*exponent;
+    	}
+    	total += indexVal*exponent;
+    }
+    char finalAnswer = MAPPING[total];
+    return finalAnswer;
 }
 
 /**
@@ -51,6 +87,22 @@ char decodeChar(char *b){
 */
 void codeToBinary(FILE *in, FILE *out, int index){
     // TODO Implement me!
+    //doesnt work
+    int charValue = 0;
+
+    do{
+    	charValue = fgetc(in);
+    	char c = (char) charValue;
+    	int bitValue = extractBit(c, index);
+    	if(bitValue==0){
+    		fprintf(out,"0");
+    	}
+    	else{
+    		fprintf(out, "1");
+    	}
+    } while(charValue!=EOF);
+    fclose(in);
+    fclose(out);
 }
 
 /**
@@ -66,6 +118,19 @@ void codeToBinary(FILE *in, FILE *out, int index){
 */
 void binaryToText(FILE *in, FILE *out){
     // TODO Implement me!
+    //doesnt work
+    int charValue;
+    do{
+    	char *charArray = calloc(6,sizeof(char));
+    	for(int i = 0;i<6; i++){
+    		charArray[i] = fgetc(in);
+    		charValue = (int) charArray[i];
+    	}
+    	char answer = decodeChar(charArray);
+    	fprintf(out,"%c", answer);
+    } while(charValue!=EOF);
+    fclose(in);
+    fclose(out);
 }
 
 /**
@@ -81,4 +146,13 @@ void binaryToText(FILE *in, FILE *out){
  */
 void decodeFile(char* input, char* bin, char* output, int index){
     // TODO Implement me!
+	 //doesnt work
+    FILE *inputFile = fopen(input, "r");
+    FILE *outputFile = fopen(output, "w");
+    FILE *binFile = fopen(bin, "w");
+    codeToBinary(inputFile,binFile,index);
+    binaryToText(binFile,outputFile);
+    fclose(inputFile);
+    fclose(outputFile);
+    fclose(binFile);
 }

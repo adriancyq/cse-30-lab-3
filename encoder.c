@@ -21,6 +21,24 @@
  */
 char* encodeChar(char c){
     // TODO Implement me!
+    //works
+    createReverseMapping();
+    char *characterArray = calloc(6,sizeof(char));
+    int cToInt = (int) c;
+    int numLeft = REVERSE_MAPPING[cToInt];
+    int bitShift = 0;
+    for(int i = 0; i<6; i++){
+    	bitShift = 1 << (5-i);
+
+    	if(numLeft < bitShift){
+    		characterArray[i] = '0';
+    	}
+    	else{
+    		characterArray[i] = '1';
+    		numLeft = numLeft - bitShift;
+    	}
+    }
+    return characterArray;
 }
 
 /**
@@ -36,6 +54,14 @@ char* encodeChar(char c){
  */
 char implantBit(char c, int bit, int index){
     // TODO Implement me!
+    //works
+    bit = bit << index;
+    char grabber, assister;
+    grabber = c;
+    assister = 1 << index;
+    grabber = grabber & (~assister);
+    grabber = grabber | bit;
+    return grabber;
 }
 
 /**
@@ -50,6 +76,15 @@ char implantBit(char c, int bit, int index){
  */
 void textToBinary(FILE *in, FILE *out){
     // TODO Implement me!
+    //doesnt work
+    char c;
+    do{
+    	c = fgetc(in);
+    	char *codeArray = encodeChar(c);
+    	for(int i = 0; i<6; i++){
+    		fprintf(out, "%c",codeArray[i]);
+    	}
+    } while(c!=EOF);
 }
 
 /**
@@ -71,6 +106,19 @@ void textToBinary(FILE *in, FILE *out){
 void binaryToCode(FILE *in, FILE *out, int index){
     srand(1); //DO NOT REMOVE OR EDIT THIS LINE OF CODE
     // TODO Implement me!
+    //doesnt work
+    char c, temp;
+    temp = (rand())%256;
+    int i = 0;
+    do{
+    	c = fgetc(in);
+    	if (c=='0'){
+    		fprintf(out, "%c", implantBit(temp,i,index));
+    	}
+    	else if (c== '1'){
+    		fprintf(out, "%c", implantBit(temp,1, index));
+    	}
+    } while(c!=EOF);
 }
 
 /**
@@ -86,4 +134,17 @@ void binaryToCode(FILE *in, FILE *out, int index){
 */
 void encodeFile(char* input, char* bin, char* output, int index){
     // TODO Implement me!
+      //doesnt work
+    FILE *inputFile = fopen(input, "r");
+    FILE *outputFile = fopen(output, "w");
+    FILE *binFile = fopen(bin, "w");
+    textToBinary(inputFile,binFile);
+    fclose(binFile);
+
+    binFile = fopen(bin, "r");
+    outputFile = fopen(output, "w");
+    binaryToCode(binFile,outputFile, index);
+    fclose(inputFile);
+    fclose(outputFile);
+    fclose(binFile);
 }
