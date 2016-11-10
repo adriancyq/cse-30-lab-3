@@ -60,7 +60,7 @@ char decodeChar(char *b){
     for (index = 0; index < 6; index++) {
 
         /* Grab each char, convert to int, raise to corresponding power */
-        mappingIndex += (b[i] - asciiOffset) * (2^exponent);
+        mappingIndex += (b[index] - asciiOffset) * (2^exponent);
         exponent--;
     }
 
@@ -118,7 +118,7 @@ void codeToBinary(FILE *in, FILE *out, int index){
         }
 
         /* Write out the char to output */
-        fwrite(writeChar, sizeof(char), 1, out);
+        fwrite(&writeChar, sizeof(char), 1, out);
     }
 
     return;
@@ -140,6 +140,7 @@ void codeToBinary(FILE *in, FILE *out, int index){
 void binaryToText(FILE *in, FILE *out){
     char inputBuffer[6];                        /* Stores 6 input chars */
     char decodedChar;                           /* decoded char from buffer */
+    int charsRead;                              /* Num chars read per iter */
 
     /* Check if we have valid filestreams */
     if ((!in) || (!out)) {
@@ -158,7 +159,7 @@ void binaryToText(FILE *in, FILE *out){
 
         /* Decode the char and write it out */
         decodedChar = decodeChar(inputBuffer);
-        fwrite(decodedChar, sizeof(char), 1, out);
+        fwrite(&decodedChar, sizeof(char), 1, out);
     }
 
     return;
