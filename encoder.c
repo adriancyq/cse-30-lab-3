@@ -20,26 +20,50 @@
  * @returns a six character array which encodes the index into ASCII binary
  */
 char* encodeChar(char c){
-    // TODO Implement me!
-    //works
-    createReverseMapping();
-    char *characterArray = calloc(6,sizeof(char));
-    int cToInt = (int) c;
-    int numLeft = REVERSE_MAPPING[cToInt];
-    int bitShift = 0;
-    for(int i = 0; i<6; i++){
-    	bitShift = 1 << (5-i);
+    char * charEncoding;                /* Array containing encoded char */
+    int encodedChar;                    /* Encoded char as an int */
+    int encodingIndex;                  /* index of for loop */
+    int arrayIndex = 0;                 /* Index to iterate reversed */
+    int bitMask = 1;                    /* Used to extract a certain bit */
+    int maskedBits = 0;                 /* Result of masking bits */
 
-    	if(numLeft < bitShift){
-    		characterArray[i] = '0';
-    	}
-    	else{
-    		characterArray[i] = '1';
-    		numLeft = numLeft - bitShift;
-    	}
+    /* Initialize REVERSE MAPPING */
+    createReverseMapping();
+
+    /* Initializes an array whose indices represent the 6 digit code */
+    charEncoding = calloc(6, sizeof(char));
+
+    /* Grab the code of the char */
+    encodedChar = REVERSE_MAPPING[(int) c];
+
+    /* Populate the array in reverse order */
+    for (encodingIndex = 5; encodingIndex >= 0; encodingIndex--) {
+
+        /* Grab the bit in the (index)th position */
+        maskedBits = (bitMask << encodingIndex) & encodedChar;
+
+        /* Assign the corresponding value in the array as a char */
+        if (!maskedBits) {
+
+            /* Bit at position is 0 */
+            charEncoding[arrayIndex] = '0';
+        }
+        else {
+
+            /* Bit at position is 1 */
+            charEncoding[arrayIndex] = '1';
+        }
+
+        /* Separately increment the arrayIndex */
+        arrayIndex++;
+
     }
-    return characterArray;
+
+    /* Return pointer to array */
+    return charEncoding;
 }
+
+
 
 /**
  * Takes a char c and int bit (should be either 0 or 1) and int index as input. 
@@ -53,16 +77,22 @@ char* encodeChar(char c){
  * @returns the char with bit b implanted into the input index
  */
 char implantBit(char c, int bit, int index){
-    // TODO Implement me!
-    //works
+    int mask;                           /* Used to erase the bit at index */
+    char editedChar;                    /* Char with implanted bit */
+
+    /* Shift the bit to implant by desired index */
     bit = bit << index;
-    char grabber, assister;
-    grabber = c;
-    assister = 1 << index;
-    grabber = grabber & (~assister);
-    grabber = grabber | bit;
-    return grabber;
+
+    /* Create mask to erase bit at desired index */
+    mask = ~(1 << index);
+
+    /* Erase the bit at desired index and replace with desired bit */
+    editedChar = c & mask;
+    editedChar = editedChar | bit;
+    return editedChar;
 }
+
+
 
 /**
  * Takes a FILE handle in as input (corresponding to a regular ASCII
@@ -75,17 +105,39 @@ char implantBit(char c, int bit, int index){
  * @param out The output file, in ASCII encoded "binary"
  */
 void textToBinary(FILE *in, FILE *out){
-    // TODO Implement me!
-    //doesnt work
-    char c;
-    do{
-    	c = fgetc(in);
-    	char *codeArray = encodeChar(c);
-    	for(int i = 0; i<6; i++){
-    		fprintf(out, "%c",codeArray[i]);
-    	}
-    } while(c!=EOF);
+    int inputChar;                         /* Char from input */
+    char * encodedChar;                     /* char we encoded from input */
+
+    /* Check that input and output streams are valid */
+    if ((!in) | (!out)) {
+        return;
+    }
+
+    /* Continue reading until end of file */
+    while (1) {
+
+        
+        /* Read in one char at a time */
+        inputChar = fgetc(in);
+
+        /* Check that it wasn't end of file */
+        if (inputChar == EOF) {
+            break;
+        }
+
+        /* Encode the char and write to output */
+        encodedChar = encodeChar(inputChar);
+        fwrite(encodedChar, sizeof(char), 6, out);
+
+        /* Free the memory in heap used by encodedChar */
+        free((void *) encodedChar);
+
+    }
+
+    return;
 }
+
+
 
 /**
  * Takes a FILE handle in as input (corresponding to a
@@ -104,21 +156,40 @@ void textToBinary(FILE *in, FILE *out){
  * @param index the index of the bit where binary values should be implanted (0 is LSB)
  */
 void binaryToCode(FILE *in, FILE *out, int index){
+    int asciiOffset = 48;               /* ASCII 0 is 48, ASCII 1 is 49 */
+    int encodedChar;
+    int encodedCharValue;
+    char randomChar;
+
     srand(1); //DO NOT REMOVE OR EDIT THIS LINE OF CODE
-    // TODO Implement me!
-    //doesnt work
-    char c, temp;
-    temp = (rand())%256;
-    int i = 0;
-    do{
-    	c = fgetc(in);
-    	if (c=='0'){
-    		fprintf(out, "%c", implantBit(temp,i,index));
-    	}
-    	else if (c== '1'){
-    		fprintf(out, "%c", implantBit(temp,1, index));
-    	}
-    } while(c!=EOF);
+
+    /* Check that input and output streams are valid */
+    if ((!in) || (!out)) {
+        return;
+    }
+
+    /* Continue reading until end of file */
+    while (1) {
+
+        
+        /* Read in one char at a time */
+        encodedChar = fgetc(in);
+
+        /* Check that it wasn't end of file */
+        if (encodedChar == EOF) {
+            break;
+        }
+
+        /* Convert ASCII ('0' or '1') to decimal (0 or 1) */
+        encodedCharValue = encodedChar - asciiOffset;
+
+        /* Implant the bit in a random char and write it out */
+        randomChar = implantBit((rand() % 256), encodedCharValue, index);
+        fwrite(&randomChar, sizeof(char), 1, out);
+
+    }
+
+    return;
 }
 
 /**
@@ -133,18 +204,28 @@ void binaryToCode(FILE *in, FILE *out, int index){
  * @param index The index of the bit where binary values should be implanted (0 is LSB)
 */
 void encodeFile(char* input, char* bin, char* output, int index){
-    // TODO Implement me!
-      //doesnt work
-    FILE *inputFile = fopen(input, "r");
-    FILE *outputFile = fopen(output, "w");
-    FILE *binFile = fopen(bin, "w");
-    textToBinary(inputFile,binFile);
-    fclose(binFile);
+    FILE * in;
+    FILE * out;
+    FILE * binaryOut;
 
-    binFile = fopen(bin, "r");
-    outputFile = fopen(output, "w");
-    binaryToCode(binFile,outputFile, index);
-    fclose(inputFile);
-    fclose(outputFile);
-    fclose(binFile);
+    /* Open filestreams for input, binary output, and encoded */
+    in = fopen(input, "rwb");
+    binaryOut = fopen(bin, "wb");
+    out = fopen(output, "wb");
+
+    /* Check that all filestreams are valid */
+    if ((!in) || (!out) || (!binaryOut)) {
+      return;
+    }
+
+    /* Convert textfile to binary */
+    textToBinary(in, binaryOut);
+    fclose(in);
+    fclose(binaryOut);
+
+    /* Reopen binary input to encode */
+    binaryOut = fopen(bin, "rb");
+    binaryToCode(binaryOut, out, index);
+    fclose(binaryOut);
+    fclose(out);
 }
