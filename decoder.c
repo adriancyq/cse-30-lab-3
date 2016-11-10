@@ -51,8 +51,8 @@ int extractBit(char c, int index){
  */
 char decodeChar(char *b){
     int index;
-    int exponent = 5;
-    int asciiOffset;
+    int exponent = 32;
+    int asciiOffset = 48;
     int mappingIndex = 0;
     char decodedChar;
 
@@ -60,8 +60,8 @@ char decodeChar(char *b){
     for (index = 0; index < 6; index++) {
 
         /* Grab each char, convert to int, raise to corresponding power */
-        mappingIndex += (b[index] - asciiOffset) * (2^exponent);
-        exponent--;
+        mappingIndex += (b[index] - asciiOffset) * exponent;
+        exponent = exponent / 2;
     }
 
     /* Decode the char */
@@ -84,7 +84,6 @@ char decodeChar(char *b){
  * @param index the index of the bit to extract from each char
 */
 void codeToBinary(FILE *in, FILE *out, int index){
-    int asciiOffset = 48;           /* ASCII '0' is 48, ASCII '1' is 49 */
     int encodedChar;                /* char grabbed from input stream */
     int extractedBit;               /* desired bit in encodedChar */
     char writeChar;                 /* char to write out */
