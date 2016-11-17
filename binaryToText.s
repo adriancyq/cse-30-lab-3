@@ -15,6 +15,12 @@ binaryToText:
     @ R0: FILE *in
     @ R1: FILE *out 
 
+    @ Dictionary of Registers:
+    @ R8: output buffer (1 char)
+    @ R9: input buffer (6 chars)
+    @ R10: input stream 
+    @ R11: output stream 
+
     @ Save caller's registers on the stack
     push {r4-r11, ip, lr}
     @-----------------------
@@ -71,15 +77,20 @@ loop:
     BL fwrite
 
     @ Loop back to beginning to decode another char 
-    @B loop
+    B loop
 
 
 endOfFile:
+
+    @ Free input buffer 
     MOV R0, R9 
+    BL free 
+
+    @ Free output buffer 
+    MOV R0, R8
     BL free 
     
 invalidFileStream:
-    @ put your return value in r0 here:
 
     @-----------------------
 return:
