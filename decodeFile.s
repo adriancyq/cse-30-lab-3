@@ -33,33 +33,33 @@ decodeFile:
     @-----------------------
     
     @ Save all the parameters in different registers 
-    MOV R8, R0
-    MOV R9, R1 
-    MOV R10, R2
-    MOV R11, R3
+    MOV R8, R0                          @ input arg
+    MOV R9, R1                          @ binary input arg 
+    MOV R10, R2                         @ output arg 
+    MOV R11, R3                         @ index arg 
 
     @ Open filesteram for encoded input and prepare parameters for fread 
-    LDR R1, =read 
+    LDR R1, =read  
     MOV R0, R8 
     BL fopen
-    MOV R5, R0 
+    MOV R5, R0                          @ input stream 
 
     @ Open filesteram for binary and prepare parameters for fread 
     LDR R1, =write
     MOV R0, R9 
     BL fopen
-    MOV R6, R0 
+    MOV R6, R0                          @ Binary output stream 
 
     @ Open filesteram for output and prepare parameters for fread 
     LDR R1, =write  
     MOV R0, R10 
     BL fopen
-    MOV R7, R0
+    MOV R7, R0                          @ Output stream 
 
     @ Convert encoded message to binary 
-    MOV R0, R5 
-    MOV R1, R6 
-    MOV R2, R3
+    MOV R0, R5                          @ Param: input stream 
+    MOV R1, R6                          @ Param: Binary output stream 
+    MOV R2, R3                          @ Param: Index 
     BL codeToBinary
 
     @ Close encoded input stream and binary output stream
@@ -70,13 +70,13 @@ decodeFile:
 
     @ Reopen binary file to READ 
     MOV R0, R9
-    MOV R1, =read 
+    LDR R1, =read 
     BL fopen
-    MOV R6, R0 
+    MOV R6, R0                          @ Binary input stream 
 
     @ Convert binary to text 
-    MOV R0, R6 
-    MOV R1, R7
+    MOV R0, R6                          @ Param: Binary input stream 
+    MOV R1, R7                          @ Param: Output sstream
     BL binaryToText 
 
     @ Close the binary and output streams
