@@ -10,10 +10,6 @@
 #include "encoder.h"
 
 int main(int argc, char *argv[]){
-	FILE * in = fopen("testin.txt", "rb");
-	FILE * out = fopen("testout.txt", "wb");
-
-	binaryToText(in, out);
-
+	decodeFile("testin.txt", "testbin.txt", "testout.txt", 1);
 	return 0;
 }
