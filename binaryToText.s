@@ -36,6 +36,11 @@ binaryToText:
     BL malloc
     MOV R9, R0 
 
+    @ Allocate space for one char as output buffer 
+    MOV R0, #1
+    BL malloc 
+    MOV R8, R0 
+
 loop:
     
     @ Prepare parameters for fread
@@ -55,11 +60,14 @@ loop:
     MOV R0, R9 
     BL decodeChar
 
+    @ Store the char 
+    STR R0, [R8]
+
     @ Write out decoded char 
-    MOV R0, R0 
-    MOV R1, #1
-    MOV R2, #1
-    MOV R3, R11 
+    MOV R0, R8      @ error here: takes in address of char, not char itself
+    MOV R1, #1                      @ sizeof(char)
+    MOV R2, #1                      @ one char 
+    MOV R3, R11                     @ Output stream 
     BL fwrite
 
     @ Loop back to beginning to decode another char 
