@@ -9,10 +9,12 @@
 
 @ char decodeChar(char *b)
 decodeChar:
+
+    @ Parameters:
+    @ R0: char *b 
+
     @ Save caller's registers on the stack
     push {r4-r11, ip, lr}
-
-    @ YOUR CODE GOES HERE
     @-----------------------
 
     @ Initialize indices for char array and MAPPING array
@@ -53,18 +55,18 @@ foundMappingIndex:
     @ Get char at generated index (R2)
     LDRB R6, [R5, R2]
 
-
-    @ (your code)
     @ put your return value in r0 here:
     MOV R0, R6 
 
     @-----------------------
+
 return:
     @ restore caller's registers
     pop {r4-r11, ip, lr}
 
     @ ARM equivalent of return
     BX lr
+
 .endfunc
 
 .end
