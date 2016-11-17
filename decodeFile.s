@@ -59,7 +59,7 @@ decodeFile:
     @ Convert encoded message to binary 
     MOV R0, R5                          @ Param: input stream 
     MOV R1, R6                          @ Param: Binary output stream 
-    MOV R2, R3                          @ Param: Index 
+    MOV R2, R11                         @ Param: Index 
     BL codeToBinary
 
     @ Close encoded input stream and binary output stream
