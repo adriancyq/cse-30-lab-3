@@ -29,7 +29,7 @@ loop:
     BGE foundMappingIndex
 
     @ Load char at specified position from the array
-    LDR R4, [R0, R1, LSL #2]
+    LDRB R4, [R0, R1]
 
     @ Subtract the ASCII value for '0' to convert to int 
     SUB R4, R4, #48
@@ -51,7 +51,7 @@ foundMappingIndex:
     LDR R5, =MAPPING 
 
     @ Get char at generated index (R2)
-    LDRB R6, [R5, R2, LSL #2]
+    LDRB R6, [R5, R2]
 
 
     @ (your code)
