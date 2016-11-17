@@ -15,11 +15,12 @@ codeToBinary:
 
     @ YOUR CODE GOES HERE
     @-----------------------
-        MOV R11, R0     @r11 is instream
         MOV R10, R1     @r10 is outstream
+        MOV R11, R0     @r11 is instream
         MOV R9, R2      @r9 is index, r3 
-        MOV R8, #0      @r8 is encodedChar
         MOV R7, #0      @r7 is extractedbit
+        MOV R8, #0      @r8 is encodedChar
+        
         
         
 
