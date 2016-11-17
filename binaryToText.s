@@ -1,5 +1,7 @@
 .syntax unified
+.data
 
+teststr: .asciz "%c\n"
 .text
 
 .align 3
@@ -44,7 +46,7 @@ loop:
 
     @ Read in 6 chars at a time 
     BL fread
-
+    
     @ Check for EOF
     CMP R0, #6
     BNE endOfFile
@@ -61,7 +63,7 @@ loop:
     BL fwrite
 
     @ Loop back to beginning to decode another char 
-    B loop
+    @B loop
 
 
 endOfFile:

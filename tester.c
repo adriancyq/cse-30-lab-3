@@ -10,8 +10,10 @@
 #include "encoder.h"
 
 int main(int argc, char *argv[]){
-	char c[] = "010101";
+	FILE * in = fopen("testin.txt", "rb");
+	FILE * out = fopen("testout.txt", "wb");
 
-	printf("Char is: %c\n", decodeChar(c));
+	binaryToText(in, out);
+
 	return 0;
 }
