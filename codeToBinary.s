@@ -1,5 +1,9 @@
 .syntax unified
 
+.data 
+zero: .asciz "0"
+one: .asciz "1"
+
 .text
 
 .align 3
@@ -32,11 +36,6 @@ codeToBinary:
     MOV R10, R1
     MOV R11, R2
 
-    @ Allocate space for output buffer 
-    MOV R0, #1 
-    BL malloc 
-    MOV R8, R0 
-
 loop:
     
     @ Grab the next encoded char 
@@ -45,8 +44,10 @@ loop:
     MOV R7, R0 
 
     @ Check if we have reached end of file 
-    CMP R7, #0
-    BEQ endOfFile
+    MOV R0, R9
+    BL feof
+    CMP R0, #0
+    BNE endOfFile
 
     @ Extract the bit we care about 
     MOV R0, R7
@@ -59,13 +60,14 @@ loop:
     BEQ writeZero
 
     @ write char is 1 
-    MOV R3, #49
+    LDR R8, =one
     STR R3, [R8]
     B writeOut 
 
 writeZero:
     
     @ Write char is 0
+    LDR R8, =zero 
     MOV R3, #48
     STR R3, [R8]
 
