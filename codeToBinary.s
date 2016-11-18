@@ -1,9 +1,5 @@
 .syntax unified
 
-.data 
-zero: .asciz "0"
-one: .asciz "1"
-
 .text
 
 .align 3
@@ -14,78 +10,51 @@ one: .asciz "1"
 @void codeToBinary(FILE *in, FILE *out, int index);
 
 codeToBinary:
-
-    @ Parameters:
-    @ R0: input stream 
-    @ R1: output stream 
-    @ R2: index 
-
-    @ Dictionary of Registers 
-    @ R6: extractBit
-    @ R7: encoded char 
-    @ R8: output buffer (writechar)
-    @ R9: input stream 
-    @ R10: output stream
-    @ R11: index 
-
     @ Save caller's registers on the stack
     push {r4-r11, ip, lr}
 
-    @ Move parameters elsewhere 
-    MOV R9, R0
-    MOV R10, R1
-    MOV R11, R2
+    @ YOUR CODE GOES HERE
+    @-----------------------
+        MOV R10, R1     @r10 is outstream
+        MOV R11, R0     @r11 is instream
+        MOV R9, R2      @r9 is index, r3 
+        MOV R7, #0      @r7 is extractedbit
+        MOV R8, #0      @r8 is encodedChar
+        
+        
+        
 
-loop:
+whileloop: 
+        MOV R0, R11     @encodedChar = fgetc(in)
+        BL fgetc        @branch to instream
+        MOV R8, R0      @encodedChar is now fgetc(in)
+        MOV R0, R11     @r0 is now instream
+        BL feof         @end of file for instream
+        CMP R0, #0      @if (encodedChar == EOF)
+        BNE end      @return when not zero
+        MOV R0, R8      @encodedChar is now r0
+        MOV R1, R9      @index moved into r1 
+        BL extractBit   @extractbit = extractedbit(encodedChar, index)
+        MOV R7, R0      @extracedbit = extractbit
+        CMP R7, #1      @compare extractedbit to 1
+        BNE asciizero   @if not equal to 1, load ascii
+        MOV R0, #49     @equal to 1, load ascii 1
+        B writeToFile   @write extractedbit to file
+
+asciizero:
+        MOV R0, #48     @extractedbit == 1, load into r0 
+
+writeToFile:
+        MOV R1, R10     @outstream is in r1
+        BL fputc        @fwrite(&writeChar, sizeof(char), 1, out);
+        B whileloop     @branch to whileloop until file is finished
+
     
-    @ Grab the next encoded char 
-    MOV R0, R9
-    BL fgetc
-    MOV R7, R0 
+    @ put your return value in r0 here:
 
-    @ Check if we have reached end of file 
-    MOV R0, R9
-    BL feof
-    CMP R0, #0
-    BNE endOfFile
+    @-----------------------
 
-    @ Extract the bit we care about 
-    MOV R0, R7
-    MOV R1, R11 
-    BL extractBit 
-    MOV R6, R0 
-
-    @ Determine if extracted bit is 0 or 1
-    CMP R6, #0
-    BEQ writeZero
-
-    @ write char is 1 
-    LDR R8, =one
-    STR R3, [R8]
-    B writeOut 
-
-writeZero:
-    
-    @ Write char is 0
-    LDR R8, =zero 
-    MOV R3, #48
-    STR R3, [R8]
-
-writeOut:
-    
-    @ Write out char 
-    MOV R0, R8
-    MOV R1, #1
-    MOV R2, #1
-    MOV R3, R10 
-    BL fwrite
-
-    @ get the next char 
-    B loop
-
-
-
-endOfFile:
+end:
 
     @ restore caller's registers
     pop {r4-r11, ip, lr}
